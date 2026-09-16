@@ -37,7 +37,7 @@ The admin page is available at `/admin`. The default password is `102030`; set `
 
 Product additions are stored permanently in Supabase Postgres. Run `supabase/products.sql` in the Supabase SQL Editor, then add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to the Vercel project environment variables. Keep the service role key server-only and never expose it to the browser.
 
-Product images are uploaded to Vercel Blob. Create a Blob store in Vercel and add `BLOB_READ_WRITE_TOKEN` to the project environment variables.
+Product images use the Supabase Storage bucket `product-images`, created by `supabase/products.sql`. Vercel Blob is optional; if `BLOB_READ_WRITE_TOKEN` is present it will be used, otherwise Supabase Storage handles the upload.
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
