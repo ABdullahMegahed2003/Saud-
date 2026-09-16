@@ -13,3 +13,5 @@ alter table public.products enable row level security;
 insert into storage.buckets (id, name, public)
 values ('product-images', 'product-images', true)
 on conflict (id) do update set public = true;
+
+notify pgrst, 'reload schema';
