@@ -37,7 +37,19 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ product }, { status: 201 });
   } catch (error) {
-    const databaseError = error instanceof Error ? error.message : "خطأ غير معروف";
+    const databaseError = getErrorMessage(error);
     return NextResponse.json({ error: `تعذر حفظ المنتج: ${databaseError}` }, { status: 500 });
   }
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "object" && error !== null) {
+    const details = error as { message?: string; code?: string; details?: string; hint?: string };
+    return [details.message, details.code && `code: ${details.code}`, details.details, details.hint]
+      .filter(Boolean)
+      .join(" | ") || JSON.stringify(error);
+  }
+
+  return String(error);
 }
