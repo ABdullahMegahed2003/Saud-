@@ -36,7 +36,8 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({ product }, { status: 201 });
-  } catch {
-    return NextResponse.json({ error: "تعذر حفظ المنتج" }, { status: 500 });
+  } catch (error) {
+    const databaseError = error instanceof Error ? error.message : "خطأ غير معروف";
+    return NextResponse.json({ error: `تعذر حفظ المنتج: ${databaseError}` }, { status: 500 });
   }
 }
