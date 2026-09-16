@@ -41,6 +41,17 @@ export async function POST(request: Request) {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
+    const { error: bucketError } = await supabase.storage.createBucket("product-images", {
+      public: true,
+    });
+
+    if (bucketError && !bucketError.message.toLowerCase().includes("already exists")) {
+      return NextResponse.json(
+        { error: "تعذر إنشاء مساحة الصور في Supabase: تحقق من مفتاح الخدمة" },
+        { status: 503 },
+      );
+    }
+
     const { error } = await supabase.storage
       .from("product-images")
       .upload(fileName, await file.arrayBuffer(), {
@@ -52,7 +63,12 @@ export async function POST(request: Request) {
 
     const { data } = supabase.storage.from("product-images").getPublicUrl(fileName);
     return NextResponse.json({ url: data.publicUrl });
-  } catch {
-    return NextResponse.json({ error: "تعذر رفع الصورة" }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message.toLowerCase() : "";
+    const errorText = message.includes("bucket")
+      ? "مساحة الصور غير جاهزة في Supabase. شغّل ملف supabase/products.sql أو تأكد من مفتاح الخدمة."
+      : "تعذر رفع الصورة. تأكد أن إعدادات Supabase موجودة في Vercel وأن حجم الصورة أقل من 5 ميجابايت.";
+
+    return NextResponse.json({ error: errorText }, { status: 500 });
   }
 }
