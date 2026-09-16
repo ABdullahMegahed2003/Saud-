@@ -31,6 +31,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
+### Product admin setup
+
+The admin page is available at `/admin`. The default password is `102030`; set `ADMIN_PASSWORD` in Vercel Environment Variables to change it.
+
+Product additions are stored permanently with Upstash Redis. Create a Redis database from the Vercel Marketplace, then add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to the Vercel project environment variables. Without these two variables, the public catalog still works, but new products cannot be saved permanently.
+
+Product images are uploaded to Vercel Blob. Create a Blob store in Vercel and add `BLOB_READ_WRITE_TOKEN` to the project environment variables.
+
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

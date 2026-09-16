@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "name": "قهوة سعودية فاخرة",
+    "description": "قهوة عربية أصلية بتحميصة متوازنة ونكهة غنية.",
+    "price": 145,
+    "status": "available",
+    "image": "/product-images/coffee.jpg"
+  },
+  {
+    "id": 2,
+    "name": "عسل سدر سعودي",
+    "description": "عسل سدر طبيعي بطعم أصيل وجودة مختارة بعناية.",
+    "price": 220,
+    "status": "preorder",
+    "image": "/product-images/honey.jpg"
+  }
+]

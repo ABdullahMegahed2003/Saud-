@@ -45,8 +45,6 @@ export default function Product({
   }, []);
 
   useEffect(() => {
-    if (featured) return;
-
     fetch("/api/products")
       .then((response) => {
         if (!response.ok) throw new Error("Products API unavailable");

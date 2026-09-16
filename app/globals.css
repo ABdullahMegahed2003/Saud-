@@ -25,6 +25,23 @@ body {
   font-family: inherit;
 }
 
+.admin-input {
+  margin-top: 0.5rem;
+  display: block;
+  width: 100%;
+  border: 1px solid rgb(31 61 42 / 0.14);
+  border-radius: 0.9rem;
+  background: #fff;
+  padding: 0.8rem 1rem;
+  font-weight: 400;
+  outline: none;
+}
+
+.admin-input:focus {
+  border-color: #d99a16;
+  box-shadow: 0 0 0 4px rgb(217 154 22 / 0.14);
+}
+
 @keyframes step-reveal {
   from {
     opacity: 0;

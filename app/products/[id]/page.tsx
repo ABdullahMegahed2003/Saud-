@@ -2,13 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FiArrowRight, FiCheck, FiClock } from "react-icons/fi";
-import { products } from "@/components/Product/products";
+import { getAllProducts } from "@/lib/products";
 import ProductDetailsControls from "@/components/Product/ProductDetails";
 import Nav from "@/components/Nav/Nav";
 
-export function generateStaticParams() {
-  return products.map((product) => ({ id: String(product.id) }));
-}
+export const dynamic = "force-dynamic";
 
 export default async function ProductDetails({
   params,
@@ -16,6 +14,7 @@ export default async function ProductDetails({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const products = await getAllProducts();
   const product = products.find((item) => item.id === Number(id));
 
   if (!product) notFound();
@@ -35,10 +34,10 @@ export default async function ProductDetails({
         </Link>
 
         <section className="grid overflow-hidden rounded-3xl border border-green-950/10 bg-white shadow-[0_14px_36px_rgba(31,61,42,0.1)] lg:grid-cols-2">
-          <div className="relative min-h-[250px] bg-green-50 lg:min-h-[430px]">
+          <div className="relative min-h-62.5 bg-green-50 lg:min-h-107.5">
             <Image
               data-product-image
-              src="/images/Hero Section.png"
+              src={product.image || "/images/Hero Section.png"}
               alt={product.name}
               fill
               priority
