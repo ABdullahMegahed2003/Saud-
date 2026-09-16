@@ -1,0 +1,78 @@
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes number-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes card-breathe {
+  0%,
+  100% {
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.1);
+  }
+
+  50% {
+    box-shadow: 0 14px 30px rgba(31, 61, 42, 0.15);
+  }
+}
+
+.section {
+}
+
+.heading,
+.type,
+.details,
+.detail {
+  opacity: 0;
+}
+
+.visible .heading {
+  animation: rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.visible .type {
+  animation: rise 650ms cubic-bezier(0.22, 1, 0.36, 1) both,
+    card-breathe 3.6s ease-in-out infinite;
+}
+
+.visible .details {
+  animation: rise 700ms 350ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.visible .detail {
+  animation: rise 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.visible .number {
+  animation: number-pulse 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heading,
+  .type,
+  .details,
+  .detail,
+  .number {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
