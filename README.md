@@ -35,7 +35,7 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 The admin page is available at `/admin`. The default password is `102030`; set `ADMIN_PASSWORD` in Vercel Environment Variables to change it.
 
-Product additions are stored permanently with Upstash Redis. Create a Redis database from the Vercel Marketplace, then add `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` to the Vercel project environment variables. Without these two variables, the public catalog still works, but new products cannot be saved permanently.
+Product additions are stored permanently in Supabase Postgres. Run `supabase/products.sql` in the Supabase SQL Editor, then add `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` to the Vercel project environment variables. Keep the service role key server-only and never expose it to the browser.
 
 Product images are uploaded to Vercel Blob. Create a Blob store in Vercel and add `BLOB_READ_WRITE_TOKEN` to the project environment variables.
 

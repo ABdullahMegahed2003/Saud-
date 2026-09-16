@@ -1,7 +1,6 @@
-import { Redis } from "@upstash/redis";
+import { createClient } from "@supabase/supabase-js";
 import { products as seedProducts, type ProductItem, type ProductStatus } from "@/components/Product/products";
 
-const PRODUCTS_KEY = "saudi:products";
 const API_URL = "https://dummyjson.com/products?limit=100";
 
 const categoryNames: Record<string, string> = {
@@ -35,37 +34,45 @@ type DummyProduct = {
   category: string;
 };
 
-function getRedis() {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+function getSupabase() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  return url && token ? new Redis({ url, token }) : null;
+  return url && serviceRoleKey ? createClient(url, serviceRoleKey) : null;
 }
 
 export function hasPersistentStorage() {
-  return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+  return Boolean(
+    (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) &&
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+  );
 }
 
 export async function getCustomProducts(): Promise<ProductItem[]> {
-  const redis = getRedis();
-  if (!redis) return [];
+  const supabase = getSupabase();
+  if (!supabase) return [];
 
-  const savedProducts = await redis.get<ProductItem[]>(PRODUCTS_KEY);
-  return Array.isArray(savedProducts) ? savedProducts : [];
+  const { data, error } = await supabase
+    .from("products")
+    .select("id, name, description, price, status, image")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as ProductItem[];
 }
 
 export async function addCustomProduct(product: Omit<ProductItem, "id">) {
-  const redis = getRedis();
-  if (!redis) throw new Error("Persistent storage is not configured");
+  const supabase = getSupabase();
+  if (!supabase) throw new Error("Persistent storage is not configured");
 
-  const currentProducts = await getCustomProducts();
-  const newProduct: ProductItem = {
-    ...product,
-    id: Date.now(),
-  };
+  const { data, error } = await supabase
+    .from("products")
+    .insert(product)
+    .select("id, name, description, price, status, image")
+    .single();
 
-  await redis.set(PRODUCTS_KEY, [...currentProducts, newProduct]);
-  return newProduct;
+  if (error) throw error;
+  return data as ProductItem;
 }
 
 async function getRemoteProducts(): Promise<ProductItem[]> {
