@@ -156,7 +156,7 @@ export default function Product({
                       alt={product.name}
                       fill
                       sizes={featured ? "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"}
-                      className="object-cover transition duration-700 group-hover:scale-105"
+                      className="object-contain p-3 transition duration-700"
                     />
                     <span
                       className={`absolute flex items-center gap-1.5 rounded-full font-bold shadow-sm ${featured ? "right-2 top-2 px-2 py-1 text-[10px]" : "right-4 top-4 px-3 py-1.5 text-xs"} ${
