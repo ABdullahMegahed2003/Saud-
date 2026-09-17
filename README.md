@@ -39,6 +39,8 @@ Product additions are stored permanently in Supabase Postgres. Run `supabase/pro
 
 Product images use the Supabase Storage bucket `product-images`, created by `supabase/products.sql`. Vercel Blob is optional; if `BLOB_READ_WRITE_TOKEN` is present it will be used, otherwise Supabase Storage handles the upload.
 
+Product backgrounds are removed during upload using remove.bg. Add `REMOVE_BG_API_KEY` to Vercel Environment Variables.
+
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
