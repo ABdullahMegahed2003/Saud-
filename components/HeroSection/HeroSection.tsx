@@ -39,7 +39,7 @@ const features = [
 
 export default function HeroSection() {
   return (
-    <section className="h-10/12 ">
+    <section className="h-auto pb-4 sm:pb-6">
       <div className=" ">
         <div className="flex flex-col md:flex-row items-center ">
 
