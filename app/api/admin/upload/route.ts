@@ -21,39 +21,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "حجم الصورة يجب ألا يتجاوز 5 ميجابايت" }, { status: 400 });
     }
 
-    const removeBackgroundKey = process.env.REMOVE_BG_API_KEY;
-    if (!removeBackgroundKey) {
-      return NextResponse.json(
-        { error: "إزالة الخلفية غير مفعلة: أضف REMOVE_BG_API_KEY في إعدادات Vercel" },
-        { status: 503 },
-      );
-    }
-
-    const removeBackgroundData = new FormData();
-    removeBackgroundData.append("image_file", file);
-    removeBackgroundData.append("size", "auto");
-    removeBackgroundData.append("format", "png");
-
-    const removeBackgroundResponse = await fetch("https://api.remove.bg/v1.0/removebg", {
-      method: "POST",
-      headers: { "X-Api-Key": removeBackgroundKey },
-      body: removeBackgroundData,
-    });
-
-    if (!removeBackgroundResponse.ok) {
-      const removeBackgroundError = await removeBackgroundResponse.text();
-      return NextResponse.json(
-        { error: `تعذر إزالة الخلفية: ${removeBackgroundError.slice(0, 180)}` },
-        { status: 502 },
-      );
-    }
-
-    const transparentImage = await removeBackgroundResponse.blob();
-
-    const fileName = `products/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}.png`;
+    const fileName = `products/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "-")}`;
 
     if (process.env.BLOB_READ_WRITE_TOKEN) {
-      const blob = await put(fileName, transparentImage, {
+      const blob = await put(fileName, file, {
         access: "public",
         addRandomSuffix: true,
       });
@@ -83,8 +54,8 @@ export async function POST(request: Request) {
 
     const { error } = await supabase.storage
       .from("product-images")
-      .upload(fileName, await transparentImage.arrayBuffer(), {
-        contentType: "image/png",
+      .upload(fileName, await file.arrayBuffer(), {
+        contentType: file.type,
         upsert: false,
       });
 
