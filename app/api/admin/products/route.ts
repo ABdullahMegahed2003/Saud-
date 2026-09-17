@@ -1,9 +1,45 @@
 import { NextResponse } from "next/server";
-import { addCustomProduct, hasPersistentStorage, isValidProductStatus } from "@/lib/products";
+import { addCustomProduct, deleteCustomProduct, getCustomProducts, hasPersistentStorage, isValidProductStatus, updateCustomProduct } from "@/lib/products";
 
 const adminPassword = process.env.ADMIN_PASSWORD || "102030";
 
+export async function GET(request: Request) {
+  if (!isAuthorized(request)) return NextResponse.json({ error: "الرقم السري غير صحيح" }, { status: 401 });
+  try {
+    const products = await getCustomProducts();
+    return NextResponse.json({ products, total: products.length });
+  } catch (error) {
+    return NextResponse.json({ error: `تعذر تحميل المنتجات: ${getErrorMessage(error)}` }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
+  if (!isAuthorized(request)) {
+    return NextResponse.json({ error: "الرقم السري غير صحيح" }, { status: 401 });
+  }
+
+  return saveProduct(request, false);
+}
+
+export async function PUT(request: Request) {
+  if (!isAuthorized(request)) return NextResponse.json({ error: "الرقم السري غير صحيح" }, { status: 401 });
+  return saveProduct(request, true);
+}
+
+export async function DELETE(request: Request) {
+  if (!isAuthorized(request)) return NextResponse.json({ error: "الرقم السري غير صحيح" }, { status: 401 });
+  try {
+    const { id } = await request.json() as { id?: unknown };
+    const productId = Number(id);
+    if (!Number.isInteger(productId)) return NextResponse.json({ error: "معرف المنتج غير صحيح" }, { status: 400 });
+    await deleteCustomProduct(productId);
+    return NextResponse.json({ deleted: true });
+  } catch (error) {
+    return NextResponse.json({ error: `تعذر حذف المنتج: ${getErrorMessage(error)}` }, { status: 500 });
+  }
+}
+
+async function saveProduct(request: Request, isUpdate: boolean) {
   if (request.headers.get("x-admin-password") !== adminPassword) {
     return NextResponse.json({ error: "الرقم السري غير صحيح" }, { status: 401 });
   }
@@ -22,20 +58,24 @@ export async function POST(request: Request) {
     const image = typeof body.image === "string" ? body.image.trim() : "";
     const price = Number(body.price);
     const status = body.status;
+    const productId = Number(body.id);
 
     if (!name || !description || !Number.isFinite(price) || price <= 0 || !isValidProductStatus(status)) {
       return NextResponse.json({ error: "راجع بيانات المنتج" }, { status: 400 });
     }
 
-    const product = await addCustomProduct({
+    const productData = {
       name,
       description,
       price,
       status,
       ...(image ? { image } : {}),
-    });
+    } as Parameters<typeof addCustomProduct>[0];
+    const product = isUpdate
+      ? await updateCustomProduct(productId, productData)
+      : await addCustomProduct(productData);
 
-    return NextResponse.json({ product }, { status: 201 });
+    return NextResponse.json({ product }, { status: isUpdate ? 200 : 201 });
   } catch (error) {
     const databaseError = getErrorMessage(error);
     return NextResponse.json({ error: `تعذر حفظ المنتج: ${databaseError}` }, { status: 500 });
@@ -52,4 +92,8 @@ function getErrorMessage(error: unknown) {
   }
 
   return String(error);
+}
+
+function isAuthorized(request: Request) {
+  return request.headers.get("x-admin-password") === adminPassword;
 }

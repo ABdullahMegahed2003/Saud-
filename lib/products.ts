@@ -92,6 +92,32 @@ export async function addCustomProduct(product: Omit<ProductItem, "id">) {
   return row;
 }
 
+export async function updateCustomProduct(id: number, product: Omit<ProductItem, "id">) {
+  const sql = getPostgres();
+  if (!sql) throw new Error("أضف POSTGRES_URL في إعدادات Vercel");
+
+  await ensureProductsTable();
+  const [row] = await sql<ProductItem[]>`
+    update public.products
+    set name = ${product.name}, description = ${product.description}, price = ${product.price},
+        status = ${product.status}, image = ${product.image || null}
+    where id = ${id}
+    returning id, name, description, price, status, image
+  `;
+  await sql.end({ timeout: 2 });
+  if (!row) throw new Error("المنتج غير موجود");
+  return row;
+}
+
+export async function deleteCustomProduct(id: number) {
+  const sql = getPostgres();
+  if (!sql) throw new Error("أضف POSTGRES_URL في إعدادات Vercel");
+
+  await ensureProductsTable();
+  await sql`delete from public.products where id = ${id}`;
+  await sql.end({ timeout: 2 });
+}
+
 async function getRemoteProducts(): Promise<ProductItem[]> {
   const response = await fetch(API_URL, { next: { revalidate: 3600 } });
   if (!response.ok) throw new Error("Remote products unavailable");
