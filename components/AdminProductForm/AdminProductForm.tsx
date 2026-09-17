@@ -14,9 +14,9 @@ const initialForm = {
   status: "available",
 };
 
-type AdminMode = "dashboard" | "create" | "manage";
+type AdminMode = "create" | "manage";
 
-export default function AdminProductForm({ mode = "dashboard" }: { mode?: AdminMode }) {
+export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode }) {
   const [password, setPassword] = useState("");
   const [form, setForm] = useState(initialForm);
   const [message, setMessage] = useState("");
@@ -90,7 +90,7 @@ export default function AdminProductForm({ mode = "dashboard" }: { mode?: AdminM
     }
 
     const response = await fetch("/api/admin/products", {
-      method: "POST",
+      method: editingId ? "PUT" : "POST",
       headers: { "Content-Type": "application/json", "x-admin-password": password },
       body: JSON.stringify({ ...form, image, price: Number(form.price), ...(editingId ? { id: editingId } : {}) }),
     });
@@ -182,7 +182,6 @@ export default function AdminProductForm({ mode = "dashboard" }: { mode?: AdminM
             <Link href="/" className="text-sm text-white/60 transition hover:text-amber-300">الموقع ↗</Link>
           </div>
           <nav className="mt-8 hidden space-y-2 lg:block">
-            <Link href="/admin" className={`flex items-center gap-3 rounded-xl px-4 py-3 font-bold transition ${mode === "dashboard" ? "bg-white/10 text-amber-300" : "text-white/65 hover:bg-white/10 hover:text-white"}`}><FiBox /> نظرة عامة</Link>
             <Link href="/admin/products/new" className={`flex items-center gap-3 rounded-xl px-4 py-3 font-bold transition ${mode === "create" ? "bg-white/10 text-amber-300" : "text-white/65 hover:bg-white/10 hover:text-white"}`}><FiPlus /> إضافة منتج</Link>
             <Link href="/admin/products/edit" className={`flex items-center gap-3 rounded-xl px-4 py-3 font-bold transition ${mode === "manage" ? "bg-white/10 text-amber-300" : "text-white/65 hover:bg-white/10 hover:text-white"}`}><FiEdit3 /> تعديل المنتجات</Link>
           </nav>
@@ -197,8 +196,7 @@ export default function AdminProductForm({ mode = "dashboard" }: { mode?: AdminM
 
         <section className="min-w-0 flex-1 px-5 py-7 sm:px-8 lg:px-12 lg:py-10">
           <header className="mb-8 flex flex-col gap-4 border-b border-green-950/10 pb-7 sm:flex-row sm:items-end sm:justify-between">
-            <div><p className="text-sm font-bold text-amber-600">إدارة الكتالوج</p><h1 className="mt-2 text-3xl font-bold text-green-950">{mode === "manage" ? (editingId ? "تعديل المنتج" : "تعديل المنتجات") : mode === "create" ? "إضافة منتج" : "نظرة عامة"}</h1><p className="mt-2 text-sm text-slate-500">{mode === "manage" ? "اختر منتجًا لتعديله أو حذفه." : mode === "create" ? "أضف منتجًا جديدًا ليظهر في المتجر." : "تابع منتجاتك وإدارة الكتالوج من هنا."}</p></div>
-            {mode !== "create" && <Link href="/admin/products/new" className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-300 px-5 py-3 text-sm font-bold text-green-950 transition hover:bg-amber-400"><FiPlus /> منتج جديد</Link>}
+            <div><p className="text-sm font-bold text-amber-600">إدارة الكتالوج</p><h1 className="mt-2 text-3xl font-bold text-green-950">{mode === "manage" ? (editingId ? "تعديل المنتج" : "تعديل المنتجات") : "إضافة منتج"}</h1><p className="mt-2 text-sm text-slate-500">{mode === "manage" ? "اختر منتجًا لتعديله أو حذفه." : "أضف منتجًا جديدًا ليظهر في المتجر."}</p></div>
           </header>
 
           {(mode !== "manage" || editingId) && <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">

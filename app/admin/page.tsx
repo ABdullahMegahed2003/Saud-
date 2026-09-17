@@ -1,4 +1,4 @@
-import AdminProductForm from "@/components/AdminProductForm/AdminProductForm";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "إدارة المنتجات",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function AdminPage() {
-  return <AdminProductForm />;
+  redirect("/admin/products/new");
 }
