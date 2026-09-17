@@ -14,7 +14,9 @@ const initialForm = {
   status: "available",
 };
 
-export default function AdminProductForm() {
+type AdminMode = "dashboard" | "create" | "manage";
+
+export default function AdminProductForm({ mode = "dashboard" }: { mode?: AdminMode }) {
   const [password, setPassword] = useState("");
   const [form, setForm] = useState(initialForm);
   const [message, setMessage] = useState("");
@@ -180,8 +182,9 @@ export default function AdminProductForm() {
             <Link href="/" className="text-sm text-white/60 transition hover:text-amber-300">الموقع ↗</Link>
           </div>
           <nav className="mt-8 hidden space-y-2 lg:block">
-            <div className="flex items-center gap-3 rounded-xl bg-white/10 px-4 py-3 font-bold text-amber-300"><FiBox /> المنتجات</div>
-            <div className="flex items-center gap-3 px-4 py-3 text-sm text-white/55"><FiImage /> الصور والكتالوج</div>
+            <Link href="/admin" className={`flex items-center gap-3 rounded-xl px-4 py-3 font-bold transition ${mode === "dashboard" ? "bg-white/10 text-amber-300" : "text-white/65 hover:bg-white/10 hover:text-white"}`}><FiBox /> نظرة عامة</Link>
+            <Link href="/admin/products/new" className={`flex items-center gap-3 rounded-xl px-4 py-3 font-bold transition ${mode === "create" ? "bg-white/10 text-amber-300" : "text-white/65 hover:bg-white/10 hover:text-white"}`}><FiPlus /> إضافة منتج</Link>
+            <Link href="/admin/products/edit" className={`flex items-center gap-3 rounded-xl px-4 py-3 font-bold transition ${mode === "manage" ? "bg-white/10 text-amber-300" : "text-white/65 hover:bg-white/10 hover:text-white"}`}><FiEdit3 /> تعديل المنتجات</Link>
           </nav>
           <div className="mt-8 rounded-2xl border border-white/10 bg-white/10 p-5">
             <p className="text-sm text-white/60">إجمالي المنتجات</p>
@@ -194,11 +197,11 @@ export default function AdminProductForm() {
 
         <section className="min-w-0 flex-1 px-5 py-7 sm:px-8 lg:px-12 lg:py-10">
           <header className="mb-8 flex flex-col gap-4 border-b border-green-950/10 pb-7 sm:flex-row sm:items-end sm:justify-between">
-            <div><p className="text-sm font-bold text-amber-600">إدارة الكتالوج</p><h1 className="mt-2 text-3xl font-bold text-green-950">{editingId ? "تعديل المنتج" : "إضافة منتج"}</h1><p className="mt-2 text-sm text-slate-500">أضف المنتجات والصور التي ستظهر لكل زوار المتجر.</p></div>
-            <button type="button" onClick={() => { setEditingId(null); setForm(initialForm); setImagePreview(""); }} className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-300 px-5 py-3 text-sm font-bold text-green-950 transition hover:bg-amber-400"><FiPlus /> منتج جديد</button>
+            <div><p className="text-sm font-bold text-amber-600">إدارة الكتالوج</p><h1 className="mt-2 text-3xl font-bold text-green-950">{mode === "manage" ? (editingId ? "تعديل المنتج" : "تعديل المنتجات") : mode === "create" ? "إضافة منتج" : "نظرة عامة"}</h1><p className="mt-2 text-sm text-slate-500">{mode === "manage" ? "اختر منتجًا لتعديله أو حذفه." : mode === "create" ? "أضف منتجًا جديدًا ليظهر في المتجر." : "تابع منتجاتك وإدارة الكتالوج من هنا."}</p></div>
+            {mode !== "create" && <Link href="/admin/products/new" className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-300 px-5 py-3 text-sm font-bold text-green-950 transition hover:bg-amber-400"><FiPlus /> منتج جديد</Link>}
           </header>
 
-          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
+          {(mode !== "manage" || editingId) && <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_340px]">
             <section className="rounded-2xl border border-green-950/10 bg-white p-6 shadow-sm sm:p-8">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <label className="block text-sm font-bold text-slate-700">اسم المنتج<input required value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="admin-input" /></label>
@@ -224,12 +227,12 @@ export default function AdminProductForm() {
               </div>
               <p className="mt-4 text-xs leading-6 text-slate-500">المعاينة تظهر فور اختيار الصورة، ويمكنك تغييرها قبل الحفظ.</p>
             </aside>
-          </div>
+          </div>}
 
-          <section className="mt-8 rounded-2xl border border-green-950/10 bg-white p-6 shadow-sm sm:p-8">
+          {mode !== "create" && <section className="mt-8 rounded-2xl border border-green-950/10 bg-white p-6 shadow-sm sm:p-8">
             <div className="flex items-center justify-between gap-4"><div><p className="text-sm text-slate-500">الكتالوج الخاص بك</p><h2 className="mt-1 text-2xl font-bold text-green-950">المنتجات المضافة</h2></div><span className="rounded-xl bg-green-100 px-4 py-2 text-sm font-bold text-green-900">{adminProducts.length} منتج</span></div>
             {adminProducts.length === 0 ? <p className="mt-6 rounded-xl bg-[#eef2ed] p-8 text-center text-sm text-slate-500">لا توجد منتجات مضافة من لوحة التحكم بعد.</p> : <div className="mt-6 grid gap-3 md:grid-cols-2">{adminProducts.map((product) => <div key={product.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 p-4"><div className="flex min-w-0 items-center gap-3">{product.image ? <Image src={product.image} alt="" width={52} height={52} className="h-13 w-13 shrink-0 rounded-lg object-cover" /> : <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-lg bg-[#eef2ed] text-slate-400"><FiImage /></div>}<div className="min-w-0"><h3 className="truncate font-bold text-green-950">{product.name}</h3><p className="text-sm text-slate-500">{product.price} ج.م</p></div></div><div className="flex shrink-0 gap-1"><button type="button" onClick={() => startEditing(product)} aria-label="تعديل المنتج" className="rounded-lg p-2 text-green-900 transition hover:bg-green-50"><FiEdit3 /></button><button type="button" onClick={() => handleDelete(product.id)} aria-label="حذف المنتج" className="rounded-lg p-2 text-red-600 transition hover:bg-red-50"><FiTrash2 /></button></div></div>)}</div>}
-          </section>
+          </section>}
         </section>
       </div>
     </main>
