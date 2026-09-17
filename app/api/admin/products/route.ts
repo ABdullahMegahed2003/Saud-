@@ -58,6 +58,7 @@ async function saveProduct(request: Request, isUpdate: boolean) {
     const image = typeof body.image === "string" ? body.image.trim() : "";
     const price = Number(body.price);
     const status = body.status;
+    const featured = body.featured === true;
     const productId = Number(body.id);
 
     if (!name || !description || !Number.isFinite(price) || price <= 0 || !isValidProductStatus(status)) {
@@ -69,6 +70,7 @@ async function saveProduct(request: Request, isUpdate: boolean) {
       description,
       price,
       status,
+      featured,
       ...(image ? { image } : {}),
     } as Parameters<typeof addCustomProduct>[0];
     const product = isUpdate

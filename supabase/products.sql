@@ -5,8 +5,11 @@ create table if not exists public.products (
   price numeric not null check (price > 0),
   status text not null check (status in ('available', 'preorder')),
   image text,
+  featured boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+alter table public.products add column if not exists featured boolean not null default false;
 
 alter table public.products enable row level security;
 

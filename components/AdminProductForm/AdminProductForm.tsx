@@ -12,6 +12,7 @@ const initialForm = {
   price: "",
   image: "",
   status: "available",
+  featured: false,
 };
 
 type AdminMode = "create" | "manage";
@@ -136,7 +137,7 @@ export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode
 
   function startEditing(product: ProductItem) {
     setEditingId(product.id);
-    setForm({ name: product.name, description: product.description, price: String(product.price), image: product.image || "", status: product.status });
+    setForm({ name: product.name, description: product.description, price: String(product.price), image: product.image || "", status: product.status, featured: product.featured === true });
     setImagePreview(product.image || "");
     setMessage("");
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -226,6 +227,10 @@ export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode
                   <label className="block text-sm font-bold text-slate-700">السعر بالجنيه<input required min="1" type="number" value={form.price} onChange={(event) => setForm({ ...form, price: event.target.value })} className="admin-input" /></label>
                   <label className="block text-sm font-bold text-slate-700">الحالة<select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value })} className="admin-input"><option value="available">متوفر الآن</option><option value="preorder">طلب مسبق</option></select></label>
                 </div>
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-green-950">
+                  <input type="checkbox" checked={form.featured} onChange={(event) => setForm({ ...form, featured: event.target.checked })} className="h-5 w-5 accent-green-900" />
+                  عرض هذا المنتج في الرئيسية
+                </label>
                 <label className="block text-sm font-bold text-slate-700">رفع صورة<input ref={fileInputRef} onChange={(event) => handleFileChange(event.target.files?.[0])} type="file" accept="image/png,image/jpeg,image/webp" className="admin-input file:ml-4 file:rounded-lg file:border-0 file:bg-green-900 file:px-4 file:py-2 file:font-bold file:text-white" /></label>
                 <label className="block text-sm font-bold text-slate-700">رابط صورة بديل<input type="url" value={form.image} onChange={(event) => { setForm({ ...form, image: event.target.value }); setImagePreview(event.target.value); }} placeholder="https://..." className="admin-input" /></label>
                 <div className="flex flex-col gap-3 pt-2 sm:flex-row">

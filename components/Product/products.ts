@@ -9,6 +9,7 @@ export type ProductItem = {
   price: number;
   status: ProductStatus;
   image?: string;
+  featured?: boolean;
 };
 
 export const products = productData as ProductItem[];

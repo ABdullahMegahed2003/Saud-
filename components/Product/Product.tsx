@@ -57,7 +57,7 @@ export default function Product({
   }, [featured]);
 
   const filteredProducts = useMemo(() => {
-    if (featured) return catalog.slice(0, 8);
+    if (featured) return catalog.filter((product) => product.featured === true).slice(0, 8);
 
     const normalizedQuery = query.trim().toLowerCase();
 

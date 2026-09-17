@@ -5,7 +5,8 @@
     "description": "قهوة عربية أصلية بتحميصة متوازنة ونكهة غنية.",
     "price": 145,
     "status": "available",
-    "image": "/product-images/coffee.jpg"
+    "image": "/product-images/coffee.jpg",
+    "featured": true
   },
   {
     "id": 2,
@@ -13,6 +14,7 @@
     "description": "عسل سدر طبيعي بطعم أصيل وجودة مختارة بعناية.",
     "price": 220,
     "status": "preorder",
-    "image": "/product-images/honey.jpg"
+    "image": "/product-images/honey.jpg",
+    "featured": true
   }
 ]

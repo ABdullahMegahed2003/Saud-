@@ -55,9 +55,11 @@ async function ensureProductsTable() {
       price numeric not null check (price > 0),
       status text not null check (status in ('available', 'preorder')),
       image text,
+      featured boolean not null default false,
       created_at timestamptz not null default now()
     )
   `;
+  await sql`alter table public.products add column if not exists featured boolean not null default false`;
   await sql.end({ timeout: 2 });
 }
 
@@ -71,7 +73,7 @@ export async function getCustomProducts(): Promise<ProductItem[]> {
 
   await ensureProductsTable();
   const rows = await sql<ProductItem[]>`
-    select id, name, description, price, status, image
+    select id, name, description, price, status, image, featured
     from public.products
     order by created_at desc
   `;
@@ -86,7 +88,7 @@ export async function addCustomProduct(product: Omit<ProductItem, "id">) {
   await ensureProductsTable();
   const [row] = await sql<ProductItem[]>`
     insert into public.products ${sql(product)}
-    returning id, name, description, price, status, image
+    returning id, name, description, price, status, image, featured
   `;
   await sql.end({ timeout: 2 });
   return row;
@@ -100,9 +102,9 @@ export async function updateCustomProduct(id: number, product: Omit<ProductItem,
   const [row] = await sql<ProductItem[]>`
     update public.products
     set name = ${product.name}, description = ${product.description}, price = ${product.price},
-        status = ${product.status}, image = ${product.image || null}
+        status = ${product.status}, image = ${product.image || null}, featured = ${product.featured === true}
     where id = ${id}
-    returning id, name, description, price, status, image
+    returning id, name, description, price, status, image, featured
   `;
   await sql.end({ timeout: 2 });
   if (!row) throw new Error("المنتج غير موجود");
@@ -130,6 +132,7 @@ async function getRemoteProducts(): Promise<ProductItem[]> {
     price: Math.round(product.price * 50),
     image: product.thumbnail,
     status: product.id % 5 === 0 ? "preorder" : "available",
+    featured: false,
   }));
 }
 
