@@ -27,6 +27,7 @@ export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode
   const [adminProducts, setAdminProducts] = useState<ProductItem[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [imagePreview, setImagePreview] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<ProductItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const loadProducts = useCallback(async (adminKey = password) => {
@@ -141,8 +142,9 @@ export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  async function handleDelete(id: number) {
-    if (!window.confirm("هل تريد حذف هذا المنتج؟")) return;
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    const id = deleteTarget.id;
     const response = await fetch("/api/admin/products", {
       method: "DELETE",
       headers: { "Content-Type": "application/json", "x-admin-password": password },
@@ -159,6 +161,7 @@ export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode
       setImagePreview("");
     }
     await loadProducts();
+    setDeleteTarget(null);
     setMessage("تم حذف المنتج.");
   }
 
@@ -244,7 +247,11 @@ export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode
 
           {mode !== "create" && <section className="mt-8 rounded-2xl border border-green-950/10 bg-white p-6 shadow-sm sm:p-8">
             <div className="flex items-center justify-between gap-4"><div><p className="text-sm text-slate-500">الكتالوج الخاص بك</p><h2 className="mt-1 text-2xl font-bold text-green-950">المنتجات المضافة</h2></div><span className="rounded-xl bg-green-100 px-4 py-2 text-sm font-bold text-green-900">{adminProducts.length} منتج</span></div>
-            {adminProducts.length === 0 ? <p className="mt-6 rounded-xl bg-[#eef2ed] p-8 text-center text-sm text-slate-500">لا توجد منتجات مضافة من لوحة التحكم بعد.</p> : <div className="mt-6 grid gap-3 md:grid-cols-2">{adminProducts.map((product) => <div key={product.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 p-4"><div className="flex min-w-0 items-center gap-3">{product.image ? <Image src={product.image} alt="" width={52} height={52} className="h-13 w-13 shrink-0 rounded-lg object-cover" /> : <div className="flex h-13 w-13 shrink-0 items-center justify-center rounded-lg bg-[#eef2ed] text-slate-400"><FiImage /></div>}<div className="min-w-0"><h3 className="truncate font-bold text-green-950">{product.name}</h3><p className="text-sm text-slate-500">{product.price} ج.م</p></div></div><div className="flex shrink-0 gap-1"><button type="button" onClick={() => startEditing(product)} aria-label="تعديل المنتج" className="rounded-lg p-2 text-green-900 transition hover:bg-green-50"><FiEdit3 /></button><button type="button" onClick={() => handleDelete(product.id)} aria-label="حذف المنتج" className="rounded-lg p-2 text-red-600 transition hover:bg-red-50"><FiTrash2 /></button></div></div>)}</div>}
+            {adminProducts.length === 0 ? <p className="mt-6 rounded-xl bg-[#eef2ed] p-8 text-center text-sm text-slate-500">لا توجد منتجات مضافة من لوحة التحكم بعد.</p> : <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{adminProducts.map((product) => <article key={product.id} className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:border-amber-300 hover:shadow-lg">
+              <div className="relative aspect-[4/3] overflow-hidden bg-[#eef2ed]">{product.image ? <Image src={product.image} alt={product.name} fill sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" /> : <div className="flex h-full items-center justify-center text-slate-400"><FiImage className="text-4xl" /></div>}<span className={`absolute right-3 top-3 rounded-full px-3 py-1 text-xs font-bold ${product.status === "available" ? "bg-green-900 text-white" : "bg-amber-300 text-green-950"}`}>{product.status === "available" ? "متوفر الآن" : "طلب مسبق"}</span></div>
+              <div className="p-4"><h3 className="truncate text-lg font-bold text-green-950">{product.name}</h3><p className="mt-1 text-sm text-slate-500">{product.description}</p><div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3"><strong className="text-amber-600">{product.price} ج.م</strong><div className="flex gap-1"><button type="button" onClick={() => startEditing(product)} aria-label="تعديل المنتج" className="rounded-lg p-2 text-green-900 transition hover:bg-green-50"><FiEdit3 /></button><button type="button" onClick={() => setDeleteTarget(product)} aria-label="حذف المنتج" className="rounded-lg p-2 text-red-600 transition hover:bg-red-50"><FiTrash2 /></button></div></div></div>
+            </article>)}</div>}
+            {deleteTarget && <div className="mt-6 flex flex-col gap-4 rounded-2xl border border-red-200 bg-red-50 p-5 sm:flex-row sm:items-center sm:justify-between"><div><p className="font-bold text-red-900">حذف المنتج؟</p><p className="mt-1 text-sm text-red-700">سيتم حذف «{deleteTarget.name}» نهائيًا من المتجر.</p></div><div className="flex gap-2"><button type="button" onClick={() => handleDelete()} className="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-700">نعم، احذف</button><button type="button" onClick={() => setDeleteTarget(null)} className="rounded-xl border border-red-300 px-4 py-2 text-sm font-bold text-red-800">إلغاء</button></div></div>}
           </section>}
         </section>
       </div>
