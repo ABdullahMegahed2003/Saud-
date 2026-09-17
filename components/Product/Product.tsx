@@ -150,13 +150,13 @@ export default function Product({
                   className={`product-card group overflow-hidden border border-green-950/10 bg-white shadow-[0_12px_30px_rgba(31,61,42,0.07)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_22px_42px_rgba(31,61,42,0.14)] ${featured ? "rounded-xl" : "rounded-2xl"}`}
                   style={{ animationDelay: `${index * 120}ms, ${900 + index * 120}ms` }}
                 >
-                  <div className={`relative aspect-[4/3] overflow-hidden bg-green-50 ${featured ? "max-h-36" : "max-h-56"}`}>
+                  <div className={`relative overflow-hidden bg-green-50 ${featured ? "h-36" : "h-48"}`}>
                     <Image
                       src={product.image || "/images/Hero Section.png"}
                       alt={product.name}
                       fill
                       sizes={featured ? "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"}
-                      className="object-contain p-5 transition duration-700"
+                      className="object-contain p-2 transition duration-700"
                     />
                     <span
                       className={`absolute flex items-center gap-1.5 rounded-full font-bold shadow-sm ${featured ? "right-2 top-2 px-2 py-1 text-[10px]" : "right-4 top-4 px-3 py-1.5 text-xs"} ${
