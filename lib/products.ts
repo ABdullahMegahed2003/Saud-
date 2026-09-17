@@ -1,4 +1,3 @@
-import { createClient } from "@supabase/supabase-js";
 import postgres from "postgres";
 import { products as seedProducts, type ProductItem, type ProductStatus } from "@/components/Product/products";
 
@@ -35,13 +34,6 @@ type DummyProduct = {
   category: string;
 };
 
-function getSupabase() {
-  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY;
-
-  return url && serviceRoleKey ? createClient(url, serviceRoleKey) : null;
-}
-
 function getPostgres() {
   const connectionString =
     process.env.POSTGRES_URL ||
@@ -70,41 +62,34 @@ async function ensureProductsTable() {
 }
 
 export function hasPersistentStorage() {
-  return Boolean(
-    (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL) &&
-      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SECRET_KEY,
-  );
+  return Boolean(process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NON_POOLING);
 }
 
 export async function getCustomProducts(): Promise<ProductItem[]> {
-  const supabase = getSupabase();
-  if (!supabase) return [];
+  const sql = getPostgres();
+  if (!sql) return [];
 
   await ensureProductsTable();
-
-  const { data, error } = await supabase
-    .from("products")
-    .select("id, name, description, price, status, image")
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data as ProductItem[];
+  const rows = await sql<ProductItem[]>`
+    select id, name, description, price, status, image
+    from public.products
+    order by created_at desc
+  `;
+  await sql.end({ timeout: 2 });
+  return rows;
 }
 
 export async function addCustomProduct(product: Omit<ProductItem, "id">) {
-  const supabase = getSupabase();
-  if (!supabase) throw new Error("Persistent storage is not configured");
+  const sql = getPostgres();
+  if (!sql) throw new Error("أضف POSTGRES_URL في إعدادات Vercel");
 
   await ensureProductsTable();
-
-  const { data, error } = await supabase
-    .from("products")
-    .insert(product)
-    .select("id, name, description, price, status, image")
-    .single();
-
-  if (error) throw error;
-  return data as ProductItem;
+  const [row] = await sql<ProductItem[]>`
+    insert into public.products ${sql(product)}
+    returning id, name, description, price, status, image
+  `;
+  await sql.end({ timeout: 2 });
+  return row;
 }
 
 async function getRemoteProducts(): Promise<ProductItem[]> {
