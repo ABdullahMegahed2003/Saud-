@@ -127,8 +127,8 @@ export default function AdminProductForm() {
   }
 
   return (
-    <main dir="rtl" className="min-h-screen bg-[#f8f6f0] px-5 py-10 sm:px-8">
-      <div className="mx-auto max-w-2xl">
+    <main dir="rtl" className="min-h-screen overflow-y-auto bg-[#f8f6f0] px-5 py-10 sm:px-8">
+      <div className="mx-auto max-w-4xl">
         <Link href="/" className="text-sm font-bold text-green-900">العودة للموقع</Link>
         <section className="mt-6 rounded-3xl border border-green-950/10 bg-white p-6 shadow-[0_14px_36px_rgba(31,61,42,0.1)] sm:p-10">
           <p className="text-sm font-bold tracking-[0.16em] text-amber-600">لوحة التحكم</p>

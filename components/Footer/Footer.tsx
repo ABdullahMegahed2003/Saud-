@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FiArrowUp, FiMail, FiMessageCircle, FiPhone } from "react-icons/fi";
 
 const footerLinks = [
@@ -16,6 +19,9 @@ const contactLinks = [
 ];
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname.startsWith("/admin")) return null;
+
   return (
     <footer dir="rtl" className="bg-green-950 px-5 pb-6 pt-14 text-white sm:px-8 lg:px-16">
       <div className="mx-auto max-w-6xl">
