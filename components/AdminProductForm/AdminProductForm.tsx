@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { FiBox, FiCheckCircle, FiEdit3, FiImage, FiLogOut, FiPlus, FiTrash2 } from "react-icons/fi";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import type { ProductItem } from "@/components/Product/products";
 
 const initialForm = {
@@ -15,6 +15,7 @@ const initialForm = {
 };
 
 type AdminMode = "create" | "manage";
+const ADMIN_SESSION_KEY = "saudi-admin-password";
 
 export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode }) {
   const [password, setPassword] = useState("");
@@ -28,11 +29,31 @@ export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode
   const [imagePreview, setImagePreview] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const loadProducts = useCallback(async (adminKey = password) => {
+    const response = await fetch("/api/admin/products", { headers: { "x-admin-password": adminKey } });
+    const data = await response.json() as { products?: ProductItem[]; error?: string };
+    if (response.ok) setAdminProducts(data.products || []);
+    else setMessage(data.error || "تعذر تحميل المنتجات");
+  }, [password]);
+
   useEffect(() => {
     return () => {
       if (imagePreview.startsWith("blob:")) URL.revokeObjectURL(imagePreview);
     };
   }, [imagePreview]);
+
+  useEffect(() => {
+    const savedPassword = sessionStorage.getItem(ADMIN_SESSION_KEY);
+    if (!savedPassword) return;
+
+    const timer = window.setTimeout(() => {
+      setPassword(savedPassword);
+      setIsAuthenticated(true);
+      void loadProducts(savedPassword);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [loadProducts]);
 
   async function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,15 +72,9 @@ export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode
       return;
     }
 
+    sessionStorage.setItem(ADMIN_SESSION_KEY, password);
     setIsAuthenticated(true);
     await loadProducts(password);
-  }
-
-  async function loadProducts(adminKey = password) {
-    const response = await fetch("/api/admin/products", { headers: { "x-admin-password": adminKey } });
-    const data = await response.json() as { products?: ProductItem[]; error?: string };
-    if (response.ok) setAdminProducts(data.products || []);
-    else setMessage(data.error || "تعذر تحميل المنتجات");
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -191,7 +206,7 @@ export default function AdminProductForm({ mode = "create" }: { mode?: AdminMode
             <p className="mt-2 text-xs text-white/50">منتجات مضافة من لوحة التحكم</p>
           </div>
           <div className="mt-6 hidden items-center gap-2 text-xs text-green-200 lg:flex"><FiCheckCircle /> البيانات متزامنة</div>
-          <button type="button" onClick={() => { setIsAuthenticated(false); setPassword(""); }} className="mt-8 hidden items-center gap-2 text-sm text-white/60 transition hover:text-red-300 lg:flex"><FiLogOut /> تسجيل الخروج</button>
+          <button type="button" onClick={() => { sessionStorage.removeItem(ADMIN_SESSION_KEY); setIsAuthenticated(false); setPassword(""); }} className="mt-8 hidden items-center gap-2 text-sm text-white/60 transition hover:text-red-300 lg:flex"><FiLogOut /> تسجيل الخروج</button>
         </aside>
 
         <section className="min-w-0 flex-1 px-5 py-7 sm:px-8 lg:px-12 lg:py-10">
